@@ -1,0 +1,61 @@
+workload,structure,operation,n,m,avg_time_ns,avg_time_ms,time_per_op_ns,metric,metric_total,metric_per_op,theory
+W1,DynamicArray,get,100,10000,9320,0.0093,0.93,accesses,10000,1.00,Theta(1) per get
+W1,LinkedList,get,100,10000,303980,0.3040,30.40,accesses,511327,51.13,Theta(n) per get
+W1,DynamicArray,get,1000,10000,157520,0.1575,15.75,accesses,10000,1.00,Theta(1) per get
+W1,LinkedList,get,1000,10000,4167200,4.1672,416.72,accesses,5021262,502.13,Theta(n) per get
+W1,DynamicArray,get,10000,10000,44600,0.0446,4.46,accesses,10000,1.00,Theta(1) per get
+W1,LinkedList,get,10000,10000,43785840,43.7858,4378.58,accesses,50188951,5018.90,Theta(n) per get
+W1,DynamicArray,get,100000,10000,17000,0.0170,1.70,accesses,10000,1.00,Theta(1) per get
+W1,LinkedList,get,100000,10000,445383660,445.3837,44538.37,accesses,504940938,50494.09,Theta(n) per get
+W2,DynamicArray,contains,100,1000,49960,0.0500,49.96,comparisons,75375,75.38,Theta(n) per search
+W2,LinkedList,contains,100,1000,108300,0.1083,108.30,comparisons,75375,75.38,Theta(n) per search
+W2,DynamicArray,contains,1000,1000,451120,0.4511,451.12,comparisons,750836,750.84,Theta(n) per search
+W2,LinkedList,contains,1000,1000,836720,0.8367,836.72,comparisons,750836,750.84,Theta(n) per search
+W2,DynamicArray,contains,10000,1000,4133260,4.1333,4133.26,comparisons,7529336,7529.34,Theta(n) per search
+W2,LinkedList,contains,10000,1000,6774940,6.7749,6774.94,comparisons,7529336,7529.34,Theta(n) per search
+W2,DynamicArray,contains,100000,1000,32786380,32.7864,32786.38,comparisons,73835543,73835.54,Theta(n) per search
+W2,LinkedList,contains,100000,1000,66432080,66.4321,66432.08,comparisons,73835543,73835.54,Theta(n) per search
+W3,DynamicArray,insert_front,100,1000,57640,0.0576,57.64,accesses+moves,602420,602.42,Theta(n) shifts per op
+W3,DynamicArray,remove_front,100,100,2360,0.0024,23.60,accesses+moves,5050,50.50,Theta(n) shifts per op
+W3,LinkedList,insert_front,100,1000,4220,0.0042,4.22,accesses+moves,1000,1.00,Theta(1) per op
+W3,LinkedList,remove_front,100,100,200,0.0002,2.00,accesses+moves,200,2.00,Theta(1) per op
+W3,DynamicArray,insert_middle,100,1000,34940,0.0349,34.94,accesses+moves,302920,302.92,Theta(n) shifts per op
+W3,DynamicArray,remove_middle,100,100,5680,0.0057,56.80,accesses+moves,2550,25.50,Theta(n) shifts per op
+W3,LinkedList,insert_middle,100,1000,264220,0.2642,264.22,accesses+moves,301500,301.50,Theta(n) traversal per op
+W3,LinkedList,remove_middle,100,100,1620,0.0016,16.20,accesses+moves,2700,27.00,Theta(n) traversal per op
+W3,DynamicArray,insert_front,1000,1000,195660,0.1957,195.66,accesses+moves,1501524,1501.52,Theta(n) shifts per op
+W3,DynamicArray,remove_front,1000,1000,40140,0.0401,40.14,accesses+moves,500500,500.50,Theta(n) shifts per op
+W3,LinkedList,insert_front,1000,1000,7020,0.0070,7.02,accesses+moves,1000,1.00,Theta(1) per op
+W3,LinkedList,remove_front,1000,1000,2220,0.0022,2.22,accesses+moves,2000,2.00,Theta(1) per op
+W3,DynamicArray,insert_middle,1000,1000,109060,0.1091,109.06,accesses+moves,752024,752.02,Theta(n) shifts per op
+W3,DynamicArray,remove_middle,1000,1000,39620,0.0396,39.62,accesses+moves,250500,250.50,Theta(n) shifts per op
+W3,LinkedList,insert_middle,1000,1000,740480,0.7405,740.48,accesses+moves,751500,751.50,Theta(n) traversal per op
+W3,LinkedList,remove_middle,1000,1000,244900,0.2449,244.90,accesses+moves,252000,252.00,Theta(n) traversal per op
+W3,DynamicArray,insert_front,10000,1000,1163840,1.1638,1163.84,accesses+moves,10500500,10500.50,Theta(n) shifts per op
+W3,DynamicArray,remove_front,10000,1000,1074480,1.0745,1074.48,accesses+moves,9500500,9500.50,Theta(n) shifts per op
+W3,LinkedList,insert_front,10000,1000,6980,0.0070,6.98,accesses+moves,1000,1.00,Theta(1) per op
+W3,LinkedList,remove_front,10000,1000,2520,0.0025,2.52,accesses+moves,2000,2.00,Theta(1) per op
+W3,DynamicArray,insert_middle,10000,1000,456900,0.4569,456.90,accesses+moves,5251000,5251.00,Theta(n) shifts per op
+W3,DynamicArray,remove_middle,10000,1000,275000,0.2750,275.00,accesses+moves,4750500,4750.50,Theta(n) shifts per op
+W3,LinkedList,insert_middle,10000,1000,4790200,4.7902,4790.20,accesses+moves,5251500,5251.50,Theta(n) traversal per op
+W3,LinkedList,remove_middle,10000,1000,4225340,4.2253,4225.34,accesses+moves,4752000,4752.00,Theta(n) traversal per op
+W3,DynamicArray,insert_front,100000,1000,7638400,7.6384,7638.40,accesses+moves,100500500,100500.50,Theta(n) shifts per op
+W3,DynamicArray,remove_front,100000,1000,6423120,6.4231,6423.12,accesses+moves,99500500,99500.50,Theta(n) shifts per op
+W3,LinkedList,insert_front,100000,1000,5500,0.0055,5.50,accesses+moves,1000,1.00,Theta(1) per op
+W3,LinkedList,remove_front,100000,1000,2940,0.0029,2.94,accesses+moves,2000,2.00,Theta(1) per op
+W3,DynamicArray,insert_middle,100000,1000,3831280,3.8313,3831.28,accesses+moves,50251000,50251.00,Theta(n) shifts per op
+W3,DynamicArray,remove_middle,100000,1000,3163600,3.1636,3163.60,accesses+moves,49750500,49750.50,Theta(n) shifts per op
+W3,LinkedList,insert_middle,100000,1000,44932540,44.9325,44932.54,accesses+moves,50251500,50251.50,Theta(n) traversal per op
+W3,LinkedList,remove_middle,100000,1000,43561140,43.5611,43561.14,accesses+moves,49752000,49752.00,Theta(n) traversal per op
+W4,MinHeap,insert,100,100,660,0.0007,6.60,comparisons,194,1.94,O(log n) per op; O(n log n) total
+W4,MinHeap,peekMin,100,10000,320,0.0003,0.03,comparisons,0,0.00,Theta(1) per op
+W4,MinHeap,extractMin,100,100,1080,0.0011,10.80,comparisons,841,8.41,O(log n) per op; Theta(n log n) total
+W4,MinHeap,insert,1000,1000,15440,0.0154,15.44,comparisons,2232,2.23,O(log n) per op; O(n log n) total
+W4,MinHeap,peekMin,1000,10000,10480,0.0105,1.05,comparisons,0,0.00,Theta(1) per op
+W4,MinHeap,extractMin,1000,1000,47140,0.0471,47.14,comparisons,14994,14.99,O(log n) per op; Theta(n log n) total
+W4,MinHeap,insert,10000,10000,127180,0.1272,12.72,comparisons,22593,2.26,O(log n) per op; O(n log n) total
+W4,MinHeap,peekMin,10000,10000,300,0.0003,0.03,comparisons,0,0.00,Theta(1) per op
+W4,MinHeap,extractMin,10000,10000,551920,0.5519,55.19,comparisons,216736,21.67,O(log n) per op; Theta(n log n) total
+W4,MinHeap,insert,100000,100000,1399840,1.3998,14.00,comparisons,227662,2.28,O(log n) per op; O(n log n) total
+W4,MinHeap,peekMin,100000,10000,19920,0.0199,1.99,comparisons,0,0.00,Theta(1) per op
+W4,MinHeap,extractMin,100000,100000,6230240,6.2302,62.30,comparisons,2831463,28.31,O(log n) per op; Theta(n log n) total
