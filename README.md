@@ -42,3 +42,25 @@ python scripts/plot_results.py      # writes results/plots/*.png and results/tab
 ```
 
 ---
+
+## 1. Overview
+
+This assignment implements three data structures from scratch (for `int` values), analyses them, and
+tests the analysis against measurements:
+
+| Structure | Physical organisation | Operations |
+|---|---|---|
+| `DynamicArray` | one contiguous `int[]`, capacity doubles when it is full | `add(x)`, `add(i,x)`, `remove(i)`, `get(i)`, `contains(x)` |
+| `LinkedList` | singly linked nodes, `head` and `tail` references | same five operations |
+| `MinHeap` | complete binary tree stored in an `int[]` (children of `i` are `2i+1`, `2i+2`) | `insert(x)`, `peekMin()`, `extractMin()` |
+
+Every structure counts its own basic operations so the benchmark can report more than time:
+
+* **accesses**: element reads/writes (array slots, or list nodes visited during a traversal);
+* **comparisons**: element comparisons (`contains`, heap sift-up/sift-down);
+* **moves**: elements shifted or copied (array), links rewritten (list).
+
+The aim is to compare the asymptotic predictions (O, Ω, Θ) with measured behaviour and to explain the gaps,
+which come from constant factors, the memory hierarchy and the JIT compiler.
+
+---
