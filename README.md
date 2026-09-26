@@ -293,3 +293,23 @@ the measured loops as dead code.
   constant overhead to both structures, so it does not change the comparison.
 
 ---
+
+## 5. Results
+
+Full data: [`results/tables/all_results.csv`](results/tables/all_results.csv) (and one CSV per workload),
+[`results/tables/summary.md`](results/tables/summary.md).
+
+### Plot 1: Execution time vs. n
+
+![Execution time vs n](results/plots/plot1_time_vs_n.png)
+
+### Plot 2: Operations / comparisons / accesses vs. n
+
+![Operations vs n](results/plots/plot2_operations_vs_n.png)
+
+### Additional plots
+
+| Time per `get(i)` | Heap comparisons per operation |
+|---|---|
+| ![get per op](results/plots/plot3_get_per_op.png) | ![heap per op](results/plots/plot4_heap_comparisons_per_op.png) |
+
