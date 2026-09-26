@@ -250,3 +250,46 @@ and its children". The proof follows the same pattern. The tests call `isValidHe
 insert and extract.)*
 
 ---
+
+## 4. Experimental Setup
+
+| Parameter | Value |
+|---|---|
+| **n** (elements initially stored) | 100, 1,000, 10,000, 100,000 |
+| **m** (operations per workload) | W1: 10,000 `get`; W2: 1,000 `contains`; W3: 1,000 insertions and `min(1000, n)` removals per position; W4: `n` inserts + `n` extractMins (+10,000 `peekMin`) |
+| Repetitions | **5 timed runs**, and the **average** is reported |
+| Warm-up | 3 untimed global rounds of all workloads for n ≤ 10,000, plus 1 untimed run before every experiment (JIT compilation) |
+| Timing | `System.nanoTime()` immediately around the operation loop only |
+| Random seed | `new Random(42)`, re-created for every (workload, n), so both structures get **identical** data |
+| Values | uniform random integers in `[0, 1,000,000)` |
+| Environment | OpenJDK 25.0.3 (JetBrains Runtime), HotSpot 64-bit Server VM, Windows 11 x64, 16 logical cores, `-Xmx2g` (see `results/tables/environment.txt`) |
+
+Input data (values, indices, search keys, values to insert) is generated **before** each timed section,
+and building the structure is also untimed. Nothing is printed inside a timed section. The results
+of the measured operations are summed into a `blackhole` variable, which is printed at the end, so the JIT cannot delete
+the measured loops as dead code.
+
+**Workloads**
+
+* **W1 Random access**: build a structure with `n` random ints, generate 10,000 indices uniformly in `[0, n−1]`, then call
+  `get(index)` for each. Metric: element accesses (array slots read, or list nodes visited).
+* **W2 Search**: 1,000 queries. Even-numbered queries use a value picked from the stored data (a successful search).
+  Odd-numbered queries use a value from `[1,000,000, 2,000,000)`, which is guaranteed absent (an unsuccessful search that scans the whole structure). Metric:
+  element comparisons.
+* **W3 Insertion/removal**: (A) 1,000 × `add(index, x)`, then (B) a rebuild of the original structure from the same data and
+  `min(1000, n)` × `remove(index)`, with `index = 0` and, in part (C), the middle. Metric: accesses + moves (array: shifted/copied
+  elements plus the slot written; list: nodes traversed plus links rewritten).
+* **W4 Priority processing**: an empty `MinHeap`, `n` inserts (timed), 10,000 `peekMin` (timed separately), and `n` extractMins
+  (timed). Metric: comparisons. After each run, the extracted sequence is checked to be non-decreasing **and** identical to
+  `Arrays.sort` of the input.
+
+**Design decisions to note**
+
+* *Removals with n = 100.* A structure with 100 elements cannot support 1,000 removals, so for removals `m = min(1000, n)`, which
+  is 100 for n = 100. The tables report the `ns / op` and `per op` columns, which normalise for this.
+* *Middle index.* The workload uses `index = size()/2` of the **current** structure. A fixed `n/2` would become an invalid index during the
+  removal phase whenever `m > n/2` (for example n = 1,000). Using the current middle keeps the operation "in the middle" throughout.
+* *Counter overhead.* The counting (`accesses++` and so on) stays enabled during timing. It adds the same kind of
+  constant overhead to both structures, so it does not change the comparison.
+
+---
