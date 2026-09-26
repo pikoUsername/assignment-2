@@ -150,3 +150,103 @@ A heap with `n` elements is a complete binary tree of height `h = ⌊log₂ n⌋
 * **`peekMin` vs. `extractMin`**: reading the minimum is free, but removing it forces the heap to be repaired along a root-to-leaf path.
 
 ---
+
+## 3. Correctness
+
+### Proof 1: `DynamicArray.add(index, x)` (shifting loop)
+
+```java
+ensureCapacity(size + 1);
+for (int i = size; i > index; i--) {
+    data[i] = data[i - 1];
+}
+data[index] = x;
+size++;
+```
+
+Let `s` be the size before the call, and let `A[0..s-1]` be the original contents. The precondition is
+`0 ≤ index ≤ s`. `ensureCapacity` guarantees `data.length ≥ s + 1` and copies `A` unchanged into the (possibly new) array,
+so every write below stays in bounds.
+
+**Loop invariant.** At the start of each iteration (each time `i > index` is tested), with `index ≤ i ≤ s`:
+
+1. `data[0 .. index-1] = A[0 .. index-1]` (the prefix is untouched);
+2. `data[index .. i-1] = A[index .. i-1]` (the part not yet shifted is still in place);
+3. `data[i+1 .. s] = A[i .. s-1]` (the part already shifted is one slot to the right).
+
+**Initialization.** Before the first test, `i = s`. No element has been modified, so (1) and (2) hold because the
+array equals `A`. Part (3) covers the range `data[s+1 .. s]`, which is empty, so it holds trivially.
+
+**Maintenance.** Suppose the invariant holds and `i > index`. The body executes `data[i] = data[i-1]`.
+Because `index ≤ i−1 ≤ i−1`, part (2) says `data[i-1] = A[i-1]`, so afterwards `data[i] = A[i-1]`.
+Together with (3), this gives `data[i .. s] = A[i-1 .. s-1]`, which is part (3) for `i−1`. The body wrote only position `i`,
+which is outside `0 .. i-2`, so part (2) for `i−1` (`data[index .. i-2] = A[index .. i-2]`) and part (1) still hold.
+After `i--`, the invariant holds for the new value of `i`.
+
+**Termination.** `i` starts at `s ≥ index` and decreases by exactly 1 per iteration, so the loop stops after
+`s − index` iterations with `i = index`. At that point part (2) covers the empty range, and the invariant gives
+
+* `data[0 .. index-1] = A[0 .. index-1]`,
+* `data[index+1 .. s] = A[index .. s-1]`.
+
+**Why this proves correctness.** The statement after the loop sets `data[index] = x` and `size = s + 1`. So
+`data[0 .. s] = A[0], …, A[index-1], x, A[index], …, A[s-1]`, which is exactly the original sequence with
+`x` inserted at position `index`. No element is lost or duplicated. The loop runs from the right end towards `index`, so
+each value is read before it is overwritten. A left-to-right loop would overwrite `A[index+1]` before it had been copied.
+The number of iterations, `s − index`, also gives the Θ(n − index) cost used in Section 2.
+
+### Proof 2: `MinHeap.insert(x)` (sift-up loop)
+
+```java
+heap[size] = x; size++;
+int i = size - 1;
+while (i > 0) {
+    int parent = (i - 1) / 2;
+    if (heap[parent] <= heap[i]) break;
+    swap(i, parent);
+    i = parent;
+}
+```
+
+Write `p(j) = (j−1)/2` for the parent of `j`. Before the call, `heap[0..s-1]` is a valid heap `H`, meaning
+`heap[p(j)] ≤ heap[j]` for all `0 < j < s`. We call the pair `(p(j), j)` an *edge*.
+
+**Loop invariant.** Each time the condition `i > 0` is tested:
+
+* **(I1)** `heap[0 .. s]` is a permutation of the multiset `H ∪ {x}`;
+* **(I2)** every edge satisfies the heap order **except possibly the edge `(p(i), i)`**;
+* **(I3)** if `i > 0`, then for every child `c` of `i`: `heap[p(i)] ≤ heap[c]` (the grandparent is not larger than
+  `i`'s children).
+
+**Initialization.** `i = s` and `x` sits in a new leaf. (I1) holds trivially. All edges except `(p(s), s)` are edges of
+`H`, which is a valid heap, so (I2) holds. Node `s` is the last element, so it has no children and (I3) holds vacuously.
+
+**Maintenance.** Assume the invariant and `i > 0`, and let `q = p(i)`.
+
+* If `heap[q] ≤ heap[i]`, the loop exits via `break` (see termination).
+* Otherwise let `a = heap[q]` and `b = heap[i]`, with `b < a`. After the swap, `heap[q] = b` and `heap[i] = a`. Check every edge that
+  touches `q` or `i`:
+  * edge `(q, i)`: `b < a`, OK;
+  * edge `(i, c)` for a child `c` of `i`: we need `a ≤ heap[c]`, which is exactly (I3) before the swap, OK;
+  * edge `(q, t)` for the sibling `t` of `i`: (I2) gave `a ≤ heap[t]` and `b < a`, so `b ≤ heap[t]`, OK;
+  * edge `(p(q), q)`: this may now be violated. It is the one exception that (I2) allows for the new `i = q`.
+
+  For (I3) with the new `i = q` (if `q > 0`): the children of `q` are `i`, which now holds `a`, and `t`. Before the swap,
+  the edge `(p(q), q)` was not the exceptional edge, so `heap[p(q)] ≤ a`, and `a ≤ heap[t]`. So `heap[p(q)]`
+  is ≤ both children of `q`, OK. A swap does not change the multiset, so (I1) holds. Setting `i = q` re-establishes the invariant.
+
+**Termination.** Each iteration replaces `i` by `p(i) = (i−1)/2 < i`, so the depth of `i` drops by one. The
+loop therefore stops after at most `⌊log₂(s+1)⌋` iterations, which is the O(log n) bound. It can stop in one of two ways:
+
+* `i = 0`: node 0 has no parent edge, so by (I2) **every** edge satisfies the heap order;
+* `break` because `heap[p(i)] ≤ heap[i]`: the only edge that (I2) left unchecked is now known to be fine, so again every edge holds.
+
+**Why this proves correctness.** In both cases the array `heap[0..s]` satisfies the heap property on every edge (I2 plus the
+exit condition), and by (I1) it contains exactly the old elements plus `x`. So after `insert` the structure is a valid
+min-heap of the right elements, and `peekMin()` = `heap[0]` is its minimum.
+
+*(`extractMin` uses the symmetric sift-down invariant: "the heap order holds everywhere except possibly between `i`
+and its children". The proof follows the same pattern. The tests call `isValidHeap()` after every single
+insert and extract.)*
+
+---
