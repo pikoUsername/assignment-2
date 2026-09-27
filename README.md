@@ -480,3 +480,32 @@ would need about n²/2 = 5·10⁹ comparisons. The heap is also array-based, so 
 The choice depends on which operations dominate and *where* they happen. The same `add(index, x)` call is the list's best case at
 index 0 and the array's worst case. Random access, iteration and memory efficiency favour the array. Front-only updates favour the list.
 Repeated minimum extraction favours the heap. A complexity table alone is not enough, because for W3 middle it predicts a tie
+while the measurements show a 12× difference.
+
+---
+
+## 7. Design Recommendations
+
+| Workload | Recommended | Why (theory + measurement) |
+|---|---|---|
+| W1 Random access by index | **Dynamic Array** | Θ(1) vs. Θ(n). Measured 1.7 ns vs. 45 µs per `get` at n = 100,000 |
+| W2 Membership search (unsorted) | **Dynamic Array** | Both Θ(n) with equal comparisons, but the array is about 2× faster because of cache locality. If searching is frequent, a hash set (Θ(1) expected) or a sorted array with binary search (Θ(log n)) would be better than either structure |
+| W3 Insert/remove at the front | **Linked List** | Θ(1) vs. Θ(n). Measured about 3 to 6 ns vs. 6 to 8 µs per operation at n = 100,000 |
+| W3 Insert/remove in the middle (by index) | **Dynamic Array** | Both Θ(n) with equal step counts, but the array's shifting is about 12× faster than the list's traversal |
+| W4 Priority processing | **Min-Heap** | Θ(1) peek, O(log n) insert and extract. Handled 100,000 items in about 7.6 ms, with order verified |
+| Mixed / unknown workload | **Dynamic Array** by default | Wins or ties in every measured case except front insertion and removal |
+
+---
+
+## 8. Conclusion
+
+* All three structures were implemented from scratch and validated with 26 test groups. These cover empty, single-element, duplicate,
+  boundary, invalid-index and 100,000-element cases, and include randomized differential testing against `ArrayList`, `java.util.LinkedList` and
+  `PriorityQueue` (20,000 random operations each). The heap property was checked after every heap operation.
+* Loop-invariant proofs were given for `DynamicArray.add(index, x)` and `MinHeap.insert(x)`.
+* The operation counts from the experiments match the asymptotic analysis closely: Θ(1) vs. Θ(n) `get`, `≈750n` comparisons for search,
+  `n − i` shifts vs. `i` hops, and `≈1.7 log₂ n` comparisons per extractMin.
+* Running time follows the same growth rates, but **constant factors matter a great deal**. With the same Θ(n) and the same number of steps, the contiguous
+  array beat the linked list by 2 to 12× because of cache locality, independent loads and SIMD. The linked list is only preferable when the work is
+  concentrated at the head. For priority-based processing, the binary heap gives logarithmic operations and fast minimum access.
+* Big-O tells us how the cost *scales*. Deciding which structure is faster at a given n also takes measurement and knowledge of the memory hierarchy.
