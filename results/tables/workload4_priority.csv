@@ -1,13 +1,13 @@
-workload,structure,operation,n,m,avg_time_ns,avg_time_ms,time_per_op_ns,metric,metric_total,metric_per_op,theory
-W4,MinHeap,insert,100,100,660,0.0007,6.60,comparisons,194,1.94,O(log n) per op; O(n log n) total
-W4,MinHeap,peekMin,100,10000,320,0.0003,0.03,comparisons,0,0.00,Theta(1) per op
-W4,MinHeap,extractMin,100,100,1080,0.0011,10.80,comparisons,841,8.41,O(log n) per op; Theta(n log n) total
-W4,MinHeap,insert,1000,1000,15440,0.0154,15.44,comparisons,2232,2.23,O(log n) per op; O(n log n) total
-W4,MinHeap,peekMin,1000,10000,10480,0.0105,1.05,comparisons,0,0.00,Theta(1) per op
-W4,MinHeap,extractMin,1000,1000,47140,0.0471,47.14,comparisons,14994,14.99,O(log n) per op; Theta(n log n) total
-W4,MinHeap,insert,10000,10000,127180,0.1272,12.72,comparisons,22593,2.26,O(log n) per op; O(n log n) total
-W4,MinHeap,peekMin,10000,10000,300,0.0003,0.03,comparisons,0,0.00,Theta(1) per op
-W4,MinHeap,extractMin,10000,10000,551920,0.5519,55.19,comparisons,216736,21.67,O(log n) per op; Theta(n log n) total
-W4,MinHeap,insert,100000,100000,1399840,1.3998,14.00,comparisons,227662,2.28,O(log n) per op; O(n log n) total
-W4,MinHeap,peekMin,100000,10000,19920,0.0199,1.99,comparisons,0,0.00,Theta(1) per op
-W4,MinHeap,extractMin,100000,100000,6230240,6.2302,62.30,comparisons,2831463,28.31,O(log n) per op; Theta(n log n) total
+structure,operation,n,m,avg_time_ns,metric,metric_total
+MinHeap,insert,100,100,580,comparisons,194
+MinHeap,peekMin,100,10000,560,comparisons,0
+MinHeap,extractMin,100,100,1080,comparisons,841
+MinHeap,insert,1000,1000,7540,comparisons,2232
+MinHeap,peekMin,1000,10000,540,comparisons,0
+MinHeap,extractMin,1000,1000,24640,comparisons,14994
+MinHeap,insert,10000,10000,98840,comparisons,22593
+MinHeap,peekMin,10000,10000,600,comparisons,0
+MinHeap,extractMin,10000,10000,484460,comparisons,216736
+MinHeap,insert,100000,100000,1100460,comparisons,227662
+MinHeap,peekMin,100000,10000,580,comparisons,0
+MinHeap,extractMin,100000,100000,6362280,comparisons,2831463

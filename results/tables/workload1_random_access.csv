@@ -1,9 +1,9 @@
-workload,structure,operation,n,m,avg_time_ns,avg_time_ms,time_per_op_ns,metric,metric_total,metric_per_op,theory
-W1,DynamicArray,get,100,10000,9320,0.0093,0.93,accesses,10000,1.00,Theta(1) per get
-W1,LinkedList,get,100,10000,303980,0.3040,30.40,accesses,511327,51.13,Theta(n) per get
-W1,DynamicArray,get,1000,10000,157520,0.1575,15.75,accesses,10000,1.00,Theta(1) per get
-W1,LinkedList,get,1000,10000,4167200,4.1672,416.72,accesses,5021262,502.13,Theta(n) per get
-W1,DynamicArray,get,10000,10000,44600,0.0446,4.46,accesses,10000,1.00,Theta(1) per get
-W1,LinkedList,get,10000,10000,43785840,43.7858,4378.58,accesses,50188951,5018.90,Theta(n) per get
-W1,DynamicArray,get,100000,10000,17000,0.0170,1.70,accesses,10000,1.00,Theta(1) per get
-W1,LinkedList,get,100000,10000,445383660,445.3837,44538.37,accesses,504940938,50494.09,Theta(n) per get
+structure,operation,n,m,avg_time_ns,metric,metric_total
+DynamicArray,get,100,10000,14300,accesses,10000
+LinkedList,get,100,10000,309920,accesses,511327
+DynamicArray,get,1000,10000,15080,accesses,10000
+LinkedList,get,1000,10000,4133700,accesses,5021262
+DynamicArray,get,10000,10000,14680,accesses,10000
+LinkedList,get,10000,10000,43914380,accesses,50188951
+DynamicArray,get,100000,10000,17520,accesses,10000
+LinkedList,get,100000,10000,451460740,accesses,504940938

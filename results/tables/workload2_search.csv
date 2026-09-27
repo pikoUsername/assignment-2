@@ -1,9 +1,9 @@
-workload,structure,operation,n,m,avg_time_ns,avg_time_ms,time_per_op_ns,metric,metric_total,metric_per_op,theory
-W2,DynamicArray,contains,100,1000,49960,0.0500,49.96,comparisons,75375,75.38,Theta(n) per search
-W2,LinkedList,contains,100,1000,108300,0.1083,108.30,comparisons,75375,75.38,Theta(n) per search
-W2,DynamicArray,contains,1000,1000,451120,0.4511,451.12,comparisons,750836,750.84,Theta(n) per search
-W2,LinkedList,contains,1000,1000,836720,0.8367,836.72,comparisons,750836,750.84,Theta(n) per search
-W2,DynamicArray,contains,10000,1000,4133260,4.1333,4133.26,comparisons,7529336,7529.34,Theta(n) per search
-W2,LinkedList,contains,10000,1000,6774940,6.7749,6774.94,comparisons,7529336,7529.34,Theta(n) per search
-W2,DynamicArray,contains,100000,1000,32786380,32.7864,32786.38,comparisons,73835543,73835.54,Theta(n) per search
-W2,LinkedList,contains,100000,1000,66432080,66.4321,66432.08,comparisons,73835543,73835.54,Theta(n) per search
+structure,operation,n,m,avg_time_ns,metric,metric_total
+DynamicArray,contains,100,1000,27780,comparisons,75375
+LinkedList,contains,100,1000,74980,comparisons,75375
+DynamicArray,contains,1000,1000,217940,comparisons,750836
+LinkedList,contains,1000,1000,687820,comparisons,750836
+DynamicArray,contains,10000,1000,2141600,comparisons,7529336
+LinkedList,contains,10000,1000,6987000,comparisons,7529336
+DynamicArray,contains,100000,1000,20619340,comparisons,73835543
+LinkedList,contains,100000,1000,68000600,comparisons,73835543
