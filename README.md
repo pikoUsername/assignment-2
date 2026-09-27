@@ -352,3 +352,70 @@ first copy of a searched value is often found earlier than its sampled position.
 n (10× n gives about 8 to 10× time), which agrees with Θ(n). The *constant* differs: the array needs about 0.44 to 0.66 ns per
 comparison and the list about 0.90 to 1.44 ns, so the array is **about 2× faster** (1.6 to 2.2×) at the same complexity (Section 6).
 
+### 5.3 Workload 3: Insertion and removal
+
+Time per operation (ns) and elementary steps (accesses + moves) per operation:
+
+| n | Operation | DynamicArray ns/op | DynamicArray steps/op | LinkedList ns/op | LinkedList steps/op | Theory (array / list) |
+|---:|---|---:|---:|---:|---:|---|
+| 100 | insert front | 57.6 | 602.4 | 4.2 | 1.0 | Θ(n) / Θ(1) |
+| 1,000 | insert front | 195.7 | 1,501.5 | 7.0 | 1.0 | Θ(n) / Θ(1) |
+| 10,000 | insert front | 1,163.8 | 10,500.5 | 7.0 | 1.0 | Θ(n) / Θ(1) |
+| 100,000 | insert front | 7,638.4 | 100,500.5 | 5.5 | 1.0 | Θ(n) / Θ(1) |
+| 100 | remove front | 23.6 | 50.5 | 2.0 | 2.0 | Θ(n) / Θ(1) |
+| 1,000 | remove front | 40.1 | 500.5 | 2.2 | 2.0 | Θ(n) / Θ(1) |
+| 10,000 | remove front | 1,074.5 | 9,500.5 | 2.5 | 2.0 | Θ(n) / Θ(1) |
+| 100,000 | remove front | 6,423.1 | 99,500.5 | 2.9 | 2.0 | Θ(n) / Θ(1) |
+| 100 | insert middle | 34.9 | 302.9 | 264.2 | 301.5 | Θ(n) / Θ(n) |
+| 1,000 | insert middle | 109.1 | 752.0 | 740.5 | 751.5 | Θ(n) / Θ(n) |
+| 10,000 | insert middle | 456.9 | 5,251.0 | 4,790.2 | 5,251.5 | Θ(n) / Θ(n) |
+| 100,000 | insert middle | 3,831.3 | 50,251.0 | 44,932.5 | 50,251.5 | Θ(n) / Θ(n) |
+| 100 | remove middle | 56.8 | 25.5 | 16.2 | 27.0 | Θ(n) / Θ(n) |
+| 1,000 | remove middle | 39.6 | 250.5 | 244.9 | 252.0 | Θ(n) / Θ(n) |
+| 10,000 | remove middle | 275.0 | 4,750.5 | 4,225.3 | 4,752.0 | Θ(n) / Θ(n) |
+| 100,000 | remove middle | 3,163.6 | 49,750.5 | 43,561.1 | 49,752.0 | Θ(n) / Θ(n) |
+
+(For n = 100, removals use m = 100. The array's "insert" steps include resize copies. For example, at n = 100 the
+count is 599,500 shifts + 1,000 writes + 1,920 elements copied by 4 doublings, which equals 602,420 exactly.)
+
+**Analysis.**
+
+* **Front.** The array must shift every element for every operation, so its steps per operation are about `n + 500` for inserts and about `n − 500` for
+  removes, and the time grows linearly. The list only relinks `head`: exactly 1 step per insert and 2 per remove, and a
+  constant 2 to 7 ns whatever n is. At n = 100,000 the list is about **1,400× faster** for inserts and about 2,200× faster for removes.
+  This is the one workload where the list wins clearly.
+* **Middle.** Both structures now perform ≈`n/2` elementary steps per operation. The counts are **almost identical** (50,251 vs.
+  50,251.5), and both are Θ(n). The *time*, however, differs by about **12×** in favour of the array (3.8 µs vs. 44.9 µs at
+  n = 100,000, and 3.2 µs vs. 43.6 µs for removal). The array's `n/2` steps are a sequential copy over contiguous memory, which the JIT turns into a SIMD loop
+  (about 0.08 ns per moved element). The list's `n/2` steps are dependent pointer loads, and each load must finish before the next address is known
+  (about 0.9 ns per node).
+* **Physical organisation.** The array's cost depends on *how many elements lie after the position* (`n − i`), so
+  the front is its worst case and the end is its best case. The list's cost depends on *how many nodes lie before the position* (`i`), so the
+  front is its best case and anywhere else requires a walk. The list is only cheap if the caller already holds a reference to the neighbouring
+  node, which this index-based interface never provides except at the head.
+
+### 5.4 Workload 4: Priority processing (Min-Heap)
+
+| n | insert: total ms | insert: ns/op | insert: comparisons (per op) | extractMin: total ms | extractMin: ns/op | extractMin: comparisons (per op) | log₂ n |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 100 | 0.001 | 6.6 | 194 (1.9) | 0.001 | 10.8 | 841 (8.4) | 6.6 |
+| 1,000 | 0.015 | 15.4 | 2,232 (2.2) | 0.047 | 47.1 | 14,994 (15.0) | 10.0 |
+| 10,000 | 0.127 | 12.7 | 22,593 (2.3) | 0.552 | 55.2 | 216,736 (21.7) | 13.3 |
+| 100,000 | 1.400 | 14.0 | 227,662 (2.3) | 6.230 | 62.3 | 2,831,463 (28.3) | 16.6 |
+
+`peekMin` (10,000 calls) took between 0.0 and 2.0 ns per call and made 0 comparisons for every n. That is below the useful resolution of
+`System.nanoTime()` and is consistent with Θ(1). For every n, all `n` extracted values were verified to be in non-decreasing order and equal to the sorted input.
+
+**Analysis.**
+
+* **insert**: the bound is O(log n) in the worst case. On random data the measured number of comparisons is a **constant ≈2.3 per insert**, because a random new key
+  rarely climbs more than one or two levels. Time per insert stays around 7 to 15 ns. This agrees with the theory: O(log n) is an upper bound,
+  and the expected cost for random input is Θ(1).
+* **peekMin**: Θ(1). It reads `heap[0]` and nothing else.
+* **extractMin**: comparisons per operation grow by a constant amount of about 6.6 for each 10× increase in n (8.4 → 15.0 → 21.7 → 28.3). That is the
+  signature of a logarithm (Plot 4), and the ratio to `log₂ n` rises towards about 1.7 (1.27, 1.50, 1.63, 1.70), staying under the `2·log₂ n` worst-case bound. Total comparisons for
+  n extractions grow as n log n (Plot 2). So the count of operations matches Θ(log n) per extractMin and Θ(n log n) in total.
+* Time per extractMin grows faster than log n (10.8 → 62.3 ns, about 5.8× for a 2.5× increase in log₂ n). The n = 100 value
+  is measured on a 1 µs total and is mostly noise. Beyond that, at larger n the heap array (400 KB at n = 100,000) is larger than the L1/L2 caches of
+  typical CPUs, so the lower levels of each sift-down path cause cache misses. The *comparison count* follows the theory exactly; the *time*
+  also includes memory-hierarchy costs that the RAM model ignores.
