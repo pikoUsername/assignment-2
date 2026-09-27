@@ -419,3 +419,64 @@ count is 599,500 shifts + 1,000 writes + 1,920 elements copied by 4 doublings, w
   is measured on a 1 µs total and is mostly noise. Beyond that, at larger n the heap array (400 KB at n = 100,000) is larger than the L1/L2 caches of
   typical CPUs, so the lower levels of each sift-down path cause cache misses. The *comparison count* follows the theory exactly; the *time*
   also includes memory-hierarchy costs that the RAM model ignores.
+
+---
+
+## 6. Discussion
+
+**1. How does increasing n affect each workload?**
+W1: array time is flat, while list time grows linearly (×10 per ×10 n). W2: both grow linearly, with an identical number of comparisons. W3 front:
+array linear, list constant. W3 middle: both linear, array about 12× faster. W4: insert time is nearly constant per operation, and extractMin grows
+logarithmically per operation (n log n in total).
+
+**2. Which results agree with the theory?**
+All the *operation counts* agree with the analysis almost exactly: 1 access vs. `(n+1)/2` for `get`, `≈750·n` comparisons in W2,
+`n − i` shifts vs. `i` hops in W3, constant list front operations, and `≈1.7 log₂ n` comparisons per extractMin. The time curves also
+have the predicted slopes on the log-log plots (slope 0 for Θ(1), slope 1 for Θ(n)).
+
+**3. Where do the experimental results differ from the prediction?**
+* For small n, the times are microseconds and are dominated by noise, timer resolution and JIT effects. For example, the array `get` at n = 1,000
+  (15.8 ns) is "slower" than at n = 100,000 (1.7 ns), and `peekMin` measured 0.0 ns. Theory describes growth, not microsecond jitter.
+* Array `remove_middle` at n = 100 costs 56.8 ns per operation, more than at n = 1,000 (39.6 ns), even though it performs 10× fewer moves.
+  Its whole measurement is about 6 µs, so fixed per-call overheads and timer resolution dominate.
+* Heap insert is O(log n) in theory but constant in practice on random data. The bound is not wrong; it is a worst case.
+* extractMin time grows faster than log n because of cache misses, which the RAM model does not include.
+* The linked list traversal costs about 0.9 ns per node here, which is fast for pointer chasing. The nodes were allocated one after another, so the
+  JVM placed them almost contiguously and the hardware prefetcher helps. In a long-running program with a fragmented heap,
+  each hop could miss the cache (≈50 to 100 ns), which would make the list far slower than measured here.
+
+**4. Why can two algorithms with the same Big-O have different running times?**
+Big-O hides constant factors and lower-order terms, and it counts abstract steps as if every step cost the same. W3 middle is the
+clearest example: the array and the list perform *the same number* of elementary steps (about 50,251 per operation at n = 100,000), both Θ(n),
+but the array is about 12× faster. W2 shows the same effect at about 2×.
+
+**5. How do constant factors and implementation details affect performance?**
+* *Memory layout*: contiguous `int[]` vs. separate 24-byte node objects. The array loads 16 ints per 64-byte cache line, while the list
+  loads roughly 2 to 3 nodes per line and must follow a pointer to reach each one.
+* *Data dependence*: in a list scan, the next address is known only after the current load completes, so the CPU cannot overlap loads.
+  An array scan has independent, predictable addresses, which allows out-of-order execution and prefetching.
+* *Vectorization*: HotSpot compiles the array shift loop into SIMD instructions (≈0.08 ns per element).
+  No equivalent optimization exists for pointer chasing.
+* *Allocation*: every list insertion allocates a node (GC pressure), while the array allocates only when it resizes.
+* *JIT warm-up and measurement*: without the warm-up phase, the first configurations measured interpreted code and were up to 30×
+  slower. The first benchmark version showed this, which is why the warm-up rounds were added.
+
+**6. Why is a Dynamic Array preferable for some workloads?**
+It has Θ(1) random access (W1: about 26,000× faster at n = 100,000), amortized Θ(1) append, cache-friendly scans (W2: about 2× faster), fast
+vectorized shifting (W3 middle: about 12× faster than the list, even though both are Θ(n)), and about 6× less memory per element.
+
+**7. When can a Linked List be useful?**
+When most insertions and deletions happen **at the front** (a stack, or a queue with a `tail` pointer), W3 front shows Θ(1) with no
+shifting: about 5 ns vs. 7.6 µs at n = 100,000. More generally, a list is useful when the caller already holds a node reference (iterators,
+LRU caches, splicing lists together) and never needs indexed access, or when an individual operation must never cause a Θ(n) resize pause.
+
+**8. Why is a Heap appropriate for priority-based processing?**
+Priority processing needs "give me the smallest" repeatedly while new items arrive. A heap offers Θ(1) `peekMin`, O(log n)
+`insert` (≈2 comparisons on random data) and Θ(log n) `extractMin`. With a sorted array, insert would be Θ(n) because of shifting. With an unsorted array or
+list, extractMin would be Θ(n) because of scanning. For n = 100,000 in W4, a full insert-then-drain cycle took about 7.6 ms. A structure that scans for the minimum
+would need about n²/2 = 5·10⁹ comparisons. The heap is also array-based, so it keeps the cache advantages of Section 6.5.
+
+**9. How does the workload influence the choice of data structure?**
+The choice depends on which operations dominate and *where* they happen. The same `add(index, x)` call is the list's best case at
+index 0 and the array's worst case. Random access, iteration and memory efficiency favour the array. Front-only updates favour the list.
+Repeated minimum extraction favours the heap. A complexity table alone is not enough, because for W3 middle it predicts a tie
