@@ -1,7 +1,4 @@
 # Assignment 2: Data Structures Analysis
-
-[Overview](#overview) · [Complexity](#complexity-analysis) · [Correctness](#correctness) · [Setup](#experimental-setup) · [Results](#results) · [Discussion](#discussion) · [Recommendations](#design-recommendations) · [Conclusion](#conclusion)
-
 ```
 javac -d out src/*.java
 java -cp out Tests
