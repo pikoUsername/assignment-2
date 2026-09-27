@@ -313,3 +313,42 @@ Full data: [`results/tables/all_results.csv`](results/tables/all_results.csv) (a
 |---|---|
 | ![get per op](results/plots/plot3_get_per_op.png) | ![heap per op](results/plots/plot4_heap_comparisons_per_op.png) |
 
+### 5.1 Workload 1: Random access (m = 10,000 `get`)
+
+| n | Structure | Avg time (ms) | ns / get | Accesses | Accesses / get | Theory |
+|---:|---|---:|---:|---:|---:|---|
+| 100 | DynamicArray | 0.009 | 0.9 | 10,000 | 1.0 | Θ(1) |
+| 1,000 | DynamicArray | 0.158 | 15.8 | 10,000 | 1.0 | Θ(1) |
+| 10,000 | DynamicArray | 0.045 | 4.5 | 10,000 | 1.0 | Θ(1) |
+| 100,000 | DynamicArray | 0.017 | 1.7 | 10,000 | 1.0 | Θ(1) |
+| 100 | LinkedList | 0.304 | 30.4 | 511,327 | 51.1 | Θ(n) |
+| 1,000 | LinkedList | 4.167 | 416.7 | 5,021,262 | 502.1 | Θ(n) |
+| 10,000 | LinkedList | 43.786 | 4,378.6 | 50,188,951 | 5,018.9 | Θ(n) |
+| 100,000 | LinkedList | 445.384 | 44,538.4 | 504,940,938 | 50,494.1 | Θ(n) |
+
+**Analysis.** The array needs exactly 1 access per `get` for every n, and its time stays at a few
+nanoseconds per call without any trend. The variation (0.9 to 15.8 ns, with the largest value at n = 1,000 and the smallest at
+n = 100,000) is noise on totals of 9 to 158 µs, not growth. The list needs `≈ (n+1)/2` node visits per `get` (51, 502, 5,019, 50,494),
+so its time grows **linearly**: each 10× increase in n gives about 10× more time (0.30 → 4.17 → 43.8 → 445 ms). At n = 100,000
+the list is about **26,000× slower**. The experiment agrees with the theory: Θ(1) vs. Θ(n) per `get`, and Θ(m) vs. Θ(m·n) in total.
+
+### 5.2 Workload 2: Search (m = 1,000 `contains`, 50% hits / 50% misses)
+
+| n | Structure | Avg time (ms) | Comparisons | Comparisons / search | ns / comparison | Theory |
+|---:|---|---:|---:|---:|---:|---|
+| 100 | DynamicArray | 0.050 | 75,375 | 75.4 | 0.66 | Θ(n) |
+| 1,000 | DynamicArray | 0.451 | 750,836 | 750.8 | 0.60 | Θ(n) |
+| 10,000 | DynamicArray | 4.133 | 7,529,336 | 7,529.3 | 0.55 | Θ(n) |
+| 100,000 | DynamicArray | 32.786 | 73,835,543 | 73,835.5 | 0.44 | Θ(n) |
+| 100 | LinkedList | 0.108 | 75,375 | 75.4 | 1.44 | Θ(n) |
+| 1,000 | LinkedList | 0.837 | 750,836 | 750.8 | 1.11 | Θ(n) |
+| 10,000 | LinkedList | 6.775 | 7,529,336 | 7,529.3 | 0.90 | Θ(n) |
+| 100,000 | LinkedList | 66.432 | 73,835,543 | 73,835.5 | 0.90 | Θ(n) |
+
+**Analysis.** Both structures perform **exactly the same comparisons**, because the algorithm (a front-to-back scan) and the data are
+identical. The expected count is `500·(n+1)/2 + 500·n ≈ 750·n`, which predicts 75,050, 750,500, 7.5 M and 75 M, and the
+measurements match. The slightly lower value at n = 100,000 comes from duplicate values: with 10⁵ draws from a range of 10⁶, the
+first copy of a searched value is often found earlier than its sampled position. Comparisons and time both grow linearly with
+n (10× n gives about 8 to 10× time), which agrees with Θ(n). The *constant* differs: the array needs about 0.44 to 0.66 ns per
+comparison and the list about 0.90 to 1.44 ns, so the array is **about 2× faster** (1.6 to 2.2×) at the same complexity (Section 6).
+
